@@ -7,26 +7,23 @@ export const compareFiles = async () => {
   
     // Filtramos solo los devices2 que NO están en devices1 (comparación exacta)
     const missingDevices = devices2
-      .filter(device2 => !normalizedNames1.has(device2.NormalizedName))
-      .map(device2 => {
-        // Ahora calculamos la similitud de este missing device con TODOS los devices1
-        const similarities = devices1.map(device1 => ({
-          device: device1.DisplayName,
-          similarity: diceSorensen({
-            wordA: device1.NormalizedName,
-            wordB: device2.NormalizedName,
-          }),
-        }));
-  
-        return {
-          missingDevice: device2.DisplayName,
-          similarities: similarities.map(s => ({
-            device: s.device,
-            similarity: (s.similarity * 100).toFixed(2) + '%',
-          })),
-        };
+    .filter(device2 => !normalizedNames1.has(device2.NormalizedName))
+    .map(device2 => {
+      const similarities = devices1.map(device1 => {
+        const similarityScore = diceSorensen({
+          wordA: device1.NormalizedName,
+          wordB: device2.NormalizedName,
+        });
+
+        return `${device1.DisplayName} (${(similarityScore * 100).toFixed(2)}%)`;
       });
-  
-    console.log('Missing devices with similarities:', missingDevices);
-    return missingDevices;
+
+      return {
+        missingDevice: device2.DisplayName,
+        similarities: similarities.join(', '), // Aquí convertimos a string
+      };
+    });
+
+  console.log('Missing devices with similarities:', missingDevices);
+  return missingDevices;
   };
