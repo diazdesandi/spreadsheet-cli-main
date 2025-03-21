@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 import { intro, select } from "@clack/prompts";
 import { compareFiles } from "./src/compareFiles.ts";
 import { getCSVFiles } from "./src/utils/index.ts";

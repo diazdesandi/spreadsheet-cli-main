@@ -77,6 +77,16 @@ export const compareFiles = async (
   // Find missing devices
   const missingDevices: MissingDevice[] = devices2
     .map((device2) => {
+      // First check if there's an exact match
+      const exactMatch = devices1.some(
+        device1 => device1.normalizedName === device2.normalizedName
+      );
+
+      // If there's an exact match, return null to filter out later
+      if (exactMatch) {
+        return null;
+      }
+
       // Calculate similarity with all devices in devices1
       const similarities: Similarity[] = devices1
         .map((device1) => ({
@@ -91,20 +101,14 @@ export const compareFiles = async (
       const similarity = similarities.map(
         ({ device, similarity }) =>
           `${device} (${(similarity * 100).toFixed(2)}%)`
-      )
-
-      if (similarities.length > 0) {
-        return {
-          ...device2,
-          similarity: similarity.join(", "), // Join all similarities into a single string
-        };
-      }
+      );
 
       return {
         ...device2,
-        similarity: ''
-      }; // Exclude devices with no similarities
+        similarity: similarity.join(", "),
+      };
     })
+    .filter((device): device is MissingDevice => device !== null);
 
   const filePath = getFilePath();
 
